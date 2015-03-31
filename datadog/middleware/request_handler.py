@@ -1,4 +1,5 @@
 # std lib
+import logging
 import time
 import traceback
 try:
@@ -12,6 +13,9 @@ from django.conf import settings
 # dogapi
 from dogapi import dog_http_api as api
 from dogapi import dog_stats_api
+
+logger = logging.getLogger('datadog.DatadogMiddleware')
+
 
 # init datadog api
 api.api_key = settings.DATADOG_API_KEY
@@ -63,6 +67,7 @@ class DatadogMiddleware(object):
         # Submit the exception to Datadog
         api.event(title, text, tags=self.event_tags, aggregation_key=request.path,
             alert_type='error')
+        logger.info("Issued event: {0} and text {1}".format(title, text))
 
         # Increment our errors metric
         tags = self._get_metric_tags(request)
